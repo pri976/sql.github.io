@@ -1,0 +1,110 @@
+use capstone;
+show tables;
+select * from cryptopunkdata;
+SELECT COUNT(*) AS count FROM cryptopunkdata
+WHERE `usd_price`>0;
+select * from cryptopunkdata;
+select max(eth_price),max(usd_price),'date' from cryptopunkdata;
+
+SELECT day, usd_price,
+  AVG(usd_price) OVER (ORDER BY day rows BETWEEN 49 PRECEDING AND CURRENT ROW) AS moving_average
+from cryptopunkdata;
+select  name, avg(usd_price) as average_price
+from cryptopunkdata
+group by name 
+order by avg(usd_price) desc;
+select Day(day), avg(eth_price)
+from cryptopunkdata
+group by Day(day)
+order by avg(eth_price) asc;
+select concat( name, "was sold for", usd_price,  "from", seller_address,"on", day)
+as summary
+from cryptopunkdata;
+
+
+use capstone;
+select * from cryptopunkdata;
+CREATE VIEW 1919_purchases AS
+SELECT *
+FROM cryptopunkdata
+WHERE ï»¿buyer_address = '0x1919db36ca2fa2e15f9000fd9cdc2edcf863e685';
+
+select round(eth_price,-1) as bucket,
+count(*) as count,
+rpad('',count(*),'-') as bar
+from cryptopunkdata
+group by bucket
+order by bucket;
+SELECT name, 'usd_price', 'highest' AS status
+FROM (
+  SELECT name, MAX(usd_price) AS price
+  FROM cryptopunkdata 
+  GROUP BY name
+) AS highest_prices
+
+UNION ALL
+
+SELECT name, 'usd_price', 'lowest' AS status
+FROM (
+  SELECT name, MIN(usd_price) AS price
+  FROM cryptopunkdata
+  GROUP BY name
+) AS lowest_prices
+
+ORDER BY name, status;
+
+select year(day), month(day), name,usd_price ,rank() 
+over(partition by name, usd_price
+ order by year(day) , month(day)  ) 
+ from cryptopunkdata;
+ 
+ SELECT YEAR(day) AS year,
+       month(day) AS month,
+       ROUND(SUM(usd_price) / 100, 0) * 100 AS total_sales
+FROM cryptopunkdata
+GROUP BY YEAR(day), MONTH(day)
+ORDER BY year, month;
+
+SELECT COUNT(*) AS count
+FROM cryptopunkdata
+WHERE `ï»¿buyer_address` = (0x1919db36ca2fa2e15f9000fd9cdc2edcf863e685) ;
+
+select day, name, usd_price,avg(usd_price)
+over(partition by name ) as avg_usd_price_capstone from cryptopunkdata
+where usd_price>0;
+
+select * from cryptopunkdata
+where pct_usd_price_capstone > 10;
+
+SELECT COUNT(*) AS count1
+FROM cryptopunkdata
+WHERE ï»¿buyer_address=( 0x1919db36ca2fa2e15f9000fd9cdc2edcf863e685);
+
+use capstone;
+select * from cryptopunkdata;
+create temporary table price_usd1_table
+select `day`from cryptopunkdata
+group by `day`
+having avg(usd_price)>0;
+
+select * from price_usd1_table;
+
+CREATE TEMPORARY TABLE IF NOT EXISTS temp_avg_prices AS (
+    SELECT 
+        day,
+        usd_price,
+        AVG(usd_price) OVER(PARTITION BY day) AS daily_avg_price
+    FROM 
+        cryptopunkdata
+);
+
+SELECT 
+    day,
+    AVG(usd_price) AS estimated_value
+FROM 
+    temp_avg_prices
+WHERE 
+    usd_price >= 0.1 * daily_avg_price
+GROUP BY 
+    day;
+       
